@@ -8,21 +8,21 @@ A micro ajax library base on [qwest](https://github.com/pyrsmk/qwest) but with a
 Examples
 ----
 Construct an ajax request:
-```js
+```javascript
 xaja.ajax(url [,options])
     .success(function(res) {
         console.log(res);
     });
 ```
 or
-```js
+```javascript
 var promise = xaja.ajax(options);
 promise.done(doSomething)
         .fail(doSomethingElse)
         .always(cleanUp);
 ```
 get and post are also available
-```js
+```javascript
 xaja.get(url, data).done(etc);
 xaja.post(url, data).done(etc);
 ```
