@@ -1,0 +1,8 @@
+{
+	"node": false,
+	"predef": [
+		"document",
+		"window",
+		"root"
+	]
+}
