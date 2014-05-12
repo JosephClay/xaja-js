@@ -1,7 +1,7 @@
 xaja
 ====
 
-A micro ajax library base on [qwest](https://github.com/pyrsmk/qwest) but with a [jquery](http://api.jquery.com/jQuery.ajax/) api, xhr2 support and promises.
+A micro ajax library base on [qwest](https://github.com/pyrsmk/qwest) but with a [jquery](http://api.jquery.com/jQuery.ajax/) api, and progress checking.
 
 ~1.94KB minified and gzipped
 
