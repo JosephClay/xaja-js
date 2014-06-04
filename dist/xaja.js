@@ -43,11 +43,11 @@
 
     }(
         {
-            "main": 1,
+            "main": "/xaja.js",
             "aliases": {}
         },
         {
-            "1": function(require, module, exports) {
+            "/xaja.js": function(require, module, exports) {
                 /**
                  * Based on qwest
                  * https://github.com/pyrsmk/qwest
@@ -83,11 +83,11 @@
                         return base;
                     },
 
-                    _promise = require('2'),
-                    _prepareUrl = require('5'),
-                    _prepareData = require('4'),
-                    _prepareHeaders = require('3'),
-                    _responseHandler = require('6'),
+                    _promise = require('/Promise.js'),
+                    _prepareUrl = require('/prepareUrl.js'),
+                    _prepareData = require('/prepareData.js'),
+                    _prepareHeaders = require('/prepareHeaders.js'),
+                    _responseHandler = require('/responseHandler.js'),
 
                 	// Core function
                 	xaja = function(options) {
@@ -222,7 +222,7 @@
 
                 root.xaja = api;
             },
-            "2": function(require, module, exports) {
+            "/Promise.js": function(require, module, exports) {
                 var _makeCalls = function(arr, context, arg) {
                 	var args = [arg],
                 		idx = 0,
@@ -281,7 +281,7 @@
                 	return api;
                 };
             },
-            "5": function(require, module, exports) {
+            "/prepareUrl.js": function(require, module, exports) {
                 var _rHasQuery = /\?/,
                 	_now = Date.now || function() { return new Date().getTime(); };
 
@@ -309,7 +309,7 @@
                 	return url;
                 };
             },
-            "4": function(require, module, exports) {
+            "/prepareData.js": function(require, module, exports) {
                 var _encodeURIComponent = encodeURIComponent;
 
                 module.exports = function(data, method) {
@@ -343,7 +343,7 @@
                 	};
                 };
             },
-            "3": function(require, module, exports) {
+            "/prepareHeaders.js": function(require, module, exports) {
                 var _CONTENT_TYPE = 'Content-Type',
                 	_ACCEPT       = 'Accept',
                 	_ACCEPT_MAP   = {
@@ -380,7 +380,7 @@
                 	}
                 };
             },
-            "6": function(require, module, exports) {
+            "/responseHandler.js": function(require, module, exports) {
                 var _PARSE_ERROR   = 'parseError',
                 	_RESPONSE_TEXT = 'responseText',
                 	_RESPONSE_XML  = 'responseXML',
