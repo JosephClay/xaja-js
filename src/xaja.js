@@ -147,6 +147,7 @@ var _shortcut = function(method) {
 // Return final xaja object
 var api = {
 	xhr2: _isVersion2,
+	getXHR: _getXHR,
 	ajax: function(url, options) {
 		var config;
 		if (_isString(url)) {
