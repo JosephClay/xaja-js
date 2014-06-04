@@ -132,6 +132,18 @@ var _XML_HTTP_REQUEST = 'XMLHttpRequest',
 		return promises;
 	};
 
+// a shortcut composer for xaja methods, e.g. .get(), .post()
+var _shortcut = function(method) {
+	return function(url, data, success, dataType) {
+		return xaja({
+			url: url,
+			method: method,
+			success: success,
+			dataType: dataType
+		});
+	};
+};
+
 // Return final xaja object
 var api = {
 	xhr2: _isVersion2,
@@ -145,37 +157,10 @@ var api = {
 		}
 		return xaja(config);
 	},
-	get: function(url, data, success, dataType) {
-		return xaja({
-			url: url,
-			success: success,
-			dataType: dataType
-		});
-	},
-	post: function(url, data, success, dataType) {
-		return xaja({
-			url: url,
-			method: _POST,
-			success: success,
-			dataType: dataType
-		});
-	},
-	put: function(url, data, success, dataType) {
-		return xaja({
-			url: url,
-			method: _PUT,
-			success: success,
-			dataType: dataType
-		});
-	},
-	del: function(url, data, success, dataType) {
-		return xaja({
-			url: url,
-			method: _DEL,
-			success: success,
-			dataType: dataType
-		});
-	}
+	get: _shortcut(_GET),
+	post: _shortcut(_POST),
+	put: _shortcut(_PUT),
+	del: _shortcut(_DEL)
 };
 
 if (typeof define === 'function') {
