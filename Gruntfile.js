@@ -25,7 +25,8 @@ module.exports = function(grunt) {
                 },
                 src_root: 'src/',
                 main: 'xaja.js',
-                safe_undefined: true
+                safe_undefined: true,
+                universal: 'xaja'
             },
             dev: {
                 options: {
