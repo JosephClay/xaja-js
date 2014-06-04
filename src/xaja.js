@@ -164,10 +164,4 @@ var api = {
 	del: _shortcut(_DEL)
 };
 
-if (typeof define === 'function') {
-	define(api);
-} else if (typeof module !== 'undefined') {
-	module.exports = api;
-}
-
 root.xaja = api;
