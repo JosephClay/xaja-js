@@ -1,4 +1,16 @@
 (function(root, _POST, _GET, _PUT, _DEL, undefined) {
+    (function(name, definition) {
+
+        if (typeof define === 'function') { // AMD
+            define(function() { return definition; });
+        } else if (typeof module !== 'undefined' && module.exports) { // Node.js
+            module.exports = definition;
+        } else { // Browser
+            this[name] = definition;
+        }
+
+    })('xaja',
+
     (function(config, definitions, undefined) {
 
         var modules = {
@@ -39,7 +51,7 @@
             define(path, definitions[path]);
         }
 
-        require(config.main);
+        return require(config.main);
 
     }(
         {
@@ -213,12 +225,6 @@
                 	put: _shortcut(_PUT),
                 	del: _shortcut(_DEL)
                 };
-
-                if (typeof define === 'function') {
-                	define(api);
-                } else if (typeof module !== 'undefined') {
-                	module.exports = api;
-                }
 
                 root.xaja = api;
             },
@@ -446,5 +452,8 @@
                 };
             }
         }
-    ));
+    ))
+    )
+
+    ;
 }(window, 'POST', 'GET', 'PUT', 'DELETE'));
