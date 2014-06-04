@@ -65,7 +65,7 @@ var _XML_HTTP_REQUEST = 'XMLHttpRequest',
 		if ((func = options.success))  { promises.success(func);  }
 		if ((func = options.complete)) { promises.complete(func); }
 		if ((func = options.error))    { promises.error(func);    }
-		if ((func = options.progress)) { promises.progress(func); } 
+		if ((func = options.progress)) { promises.progress(func); }
 
 		// prepare data
 		var dataPrep = _prepareData(initialData, method),
@@ -76,7 +76,7 @@ var _XML_HTTP_REQUEST = 'XMLHttpRequest',
 		url = _prepareUrl(initialUrl, data, method, cache);
 
 		xhr.onprogress = function(evt) {
-			if (!evt.lengthComputable) { return; } 
+			if (!evt.lengthComputable) { return; }
 
 			// evt.loaded the bytes browser receive
 			// evt.total the total bytes seted by the header
@@ -126,10 +126,10 @@ var _XML_HTTP_REQUEST = 'XMLHttpRequest',
 		}
 
 		// send the request
-		xhr.send(method === _POST ? data : null);
+		xhr.send(method !== _GET ? data : null);
 
 		// return the promises
-		return promises;	
+		return promises;
 	};
 
 // Return final xaja object
@@ -156,6 +156,22 @@ var api = {
 		return xaja({
 			url: url,
 			method: _POST,
+			success: success,
+			dataType: dataType
+		});
+	},
+	put: function(url, data, success, dataType) {
+		return xaja({
+			url: url,
+			method: _PUT,
+			success: success,
+			dataType: dataType
+		});
+	},
+	del: function(url, data, success, dataType) {
+		return xaja({
+			url: url,
+			method: _DEL,
 			success: success,
 			dataType: dataType
 		});

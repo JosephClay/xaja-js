@@ -18,14 +18,14 @@ module.exports = function(xhr, headers, method, type, isSerialized) {
 	for (headerKey in headers) {
 		formattedHeaderKey = headerKey.replace(_rKeyFormatter, _toUpper);
 		headers[formattedHeaderKey] = headers[headerKey];
-		
+
 		delete headers[headerKey];
 
 		xhr.setRequestHeader(formattedHeaderKey, headers[formattedHeaderKey]);
 	}
 
 	// ensure a content type
-	if (!headers[_CONTENT_TYPE] && isSerialized && method === _POST) {
+	if (!headers[_CONTENT_TYPE] && isSerialized && method !== _GET) {
 		xhr.setRequestHeader(_CONTENT_TYPE, 'application/x-www-form-urlencoded');
 	}
 

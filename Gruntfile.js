@@ -19,7 +19,9 @@ module.exports = function(grunt) {
                 globals: {
                     'root' : "window",
                     '_POST': "'POST'",
-                    '_GET' : "'GET'"
+                    '_GET' : "'GET'",
+                    '_PUT' : "'PUT'",
+                    '_DEL' : "'DELETE'"
                 },
                 src_root: 'src/',
                 main: 'xaja.js',
