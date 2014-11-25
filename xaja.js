@@ -252,7 +252,7 @@ module.exports = function(url, data, method, cache) {
 
 	if (!cache) {
 		if (vars) { vars += '&'; }
-		vars += '___=' + _now();
+		vars += '_=' + _now();
 	}
 
 	if (vars) {

@@ -58,7 +58,6 @@ jQuery settings support:
 Note
 ----
 - Unlike [qwest](https://github.com/pyrsmk/qwest), therea are no limit settings.
-- Non 'GET' and 'POST' methods are not supported yet.
 - This lib is for browsers IE9+, but may work in older browsers.
 - Unit tests pending.
 
