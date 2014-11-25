@@ -1,16 +1,17 @@
-var _encodeURIComponent = encodeURIComponent;
+var root = window,
+	_encodeURIComponent = encodeURIComponent;
 
 module.exports = function(data, method) {
 	var isSerialized = false;
 
 	if (
-		root.ArrayBuffer && 
+		root.ArrayBuffer &&
 		(data instanceof ArrayBuffer ||
 		data instanceof Blob         ||
 		data instanceof Document     ||
 		data instanceof FormData)
 	) {
-		if (method === _GET) {
+		if (method === 'GET') {
 			data = null;
 		}
 	} else {

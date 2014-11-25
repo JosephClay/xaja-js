@@ -25,7 +25,7 @@ module.exports = function(xhr, headers, method, type, isSerialized) {
 	}
 
 	// ensure a content type
-	if (!headers[_CONTENT_TYPE] && isSerialized && method !== _GET) {
+	if (!headers[_CONTENT_TYPE] && isSerialized && method !== 'GET') {
 		xhr.setRequestHeader(_CONTENT_TYPE, 'application/x-www-form-urlencoded');
 	}
 

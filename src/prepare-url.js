@@ -5,12 +5,12 @@ module.exports = function(url, data, method, cache) {
 	var vars = '';
 
 	// Prepare URL
-	if (method === _GET) {
+	if (method === 'GET') {
 		vars += data;
 	}
 
 	if (cache !== undefined) {
-		cache = (method === _POST);
+		cache = (method === 'POST');
 	}
 
 	if (!cache) {
