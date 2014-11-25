@@ -353,11 +353,6 @@ module.exports = function(xhr, isTypeSupported, promises, url, statusCode, callC
 							throw e.message;
 						}
 						break;
-					case 'js':
-						/* jshint ignore:start */
-						response = (new Function('"use strict";' + xhr[_RESPONSE_TEXT])).call(callContext);
-						/* jshint ignore:end */
-						break;
 					case 'xml':
 						if (!xhr[_RESPONSE_XML] || (xhr[_RESPONSE_XML][_PARSE_ERROR] && xhr[_RESPONSE_XML][_PARSE_ERROR].errorCode && xhr[_RESPONSE_XML][_PARSE_ERROR].reason)) {
 							throw 'Error while parsing XML body';
