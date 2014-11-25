@@ -58,7 +58,7 @@ jQuery settings support:
 Note
 ----
 - Unlike [qwest](https://github.com/pyrsmk/qwest), therea are no limit settings.
-- This lib is for browsers IE9+, but may work in older browsers.
+- This lib is for browsers IE9+
 - Unit tests pending.
 
 License

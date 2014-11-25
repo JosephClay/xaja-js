@@ -21,7 +21,15 @@ module.exports = function() {
 				successStack.push(func);
 				return api;
 			},
+			then: function(func) {
+				successStack.push(func);
+				return api;
+			},
 			error: function(func) {
+				errorStack.push(func);
+				return api;
+			},
+			catch: function(func) {
 				errorStack.push(func);
 				return api;
 			},
@@ -30,6 +38,10 @@ module.exports = function() {
 				return api;
 			},
 			complete: function(func) {
+				completeStack.push(func);
+				return api;
+			},
+			finally: function(func) {
 				completeStack.push(func);
 				return api;
 			},
