@@ -76,8 +76,6 @@ Note
 - Does not support jquery's deprecated `success`, `error`, `complete` methods
 - Supports IE9+
 
-```
-
 #License
 
 The MIT License (MIT)
