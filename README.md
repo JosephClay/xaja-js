@@ -62,12 +62,13 @@ jQuery settings support:
 | url         | jsonpCallback |
 | username    | processData   |
 | xhr         | global        |
-| xhrFields   | async         |
+| xhrFields   |
 | complete    |
 | beforeSend  |
 | cache       |
 | timeout     |
 | crossDomain |
+| async       |
 
 Note
 ----
