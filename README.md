@@ -22,10 +22,12 @@ var promise = xaja.ajax(options);
 promise.then(doSomething)
     .catch(doSomethingElse);
 ```
-get and post are also available
+get, post, put and delete methods are also available
 ```javascript
 xaja.get(url, data).then(success, failure);
 xaja.post(url, data).then(success, failure);
+xaja.put(url, data).then(success, failure);
+xaja.del(url, data).then(success, failure);
 ```
 
 JSON defaults
@@ -73,8 +75,6 @@ Note
 - More jquery methods/options may be added in the future
 - Does not support jquery's deprecated `success`, `error`, `complete` methods
 - Supports IE9+
-
-```
 
 #License
 
