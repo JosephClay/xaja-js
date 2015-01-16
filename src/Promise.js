@@ -1,69 +1,78 @@
-var _makeCalls = function(arr, context, arg) {
-	var args = [arg],
-		idx = 0,
-		func;
-	while ((func = arr[idx])) {
+var makeCalls = function(arr, context, arg) {
+	if (!arr) { return; }
+
+	var idx = 0,
+		fn;
+	while ((fn = arr[idx])) {
 		idx++;
-		func.apply(context, args);
+		fn.call(context, arg);
 	}
 
 	arr.length = 0;
 };
 
 module.exports = function() {
-	var successStack  = [],
-		errorStack    = [],
-		progressStack = [],
-		completeStack = [],
+
+	var successStack,
+		errorStack,
+		progressStack,
+		completeStack,
 
 		api = {
-			success: function(func) {
-				successStack.push(func);
-				return api;
-			},
-			then: function(func) {
-				successStack.push(func);
-				return api;
-			},
-			error: function(func) {
-				errorStack.push(func);
-				return api;
-			},
-			catch: function(func) {
-				errorStack.push(func);
-				return api;
-			},
-			progress: function(func) {
-				progressStack.push(func);
-				return api;
-			},
-			complete: function(func) {
-				completeStack.push(func);
-				return api;
-			},
-			finally: function(func) {
-				completeStack.push(func);
-				return api;
-			},
-
 			tick: function(perc) {
-				_makeCalls(progressStack, perc, perc);
+				makeCalls(progressStack, perc, perc);
+				return api;
 			},
 			resolve: function(xhr, response) {
-				_makeCalls(successStack, xhr, response);
-				_makeCalls(completeStack, xhr);
+				setTimeout(function() {
+					makeCalls(successStack, xhr, response);
+					makeCalls(completeStack, xhr);
+				}, 0);
 				return api;
 			},
 			reject: function(xhr, response) {
-				_makeCalls(errorStack, xhr, response);
-				_makeCalls(completeStack, xhr);
+				setTimeout(function() {
+					makeCalls(errorStack, xhr, response);
+					makeCalls(completeStack, xhr);
+				}, 0);
 				return api;
+			},
+
+			promise: function() {
+				var p = {
+					then: function(fn, err) {
+						successStack = successStack || [];
+						successStack.push(fn);
+
+						if (err) { p.catch(err); }
+						
+						return p;
+					},
+					catch: function(fn) {
+						errorStack = errorStack || [];
+						errorStack.push(fn);
+						return p;
+					},
+					finally: function(fn) {
+						completeStack = completeStack || [];
+						completeStack.push(fn);
+						return p;
+					},
+					progress: function(fn) {
+						progressStack = progressStack || [];
+						progressStack.push(fn);
+						return p;
+					}
+				};
+
+				// jquery methods: done, fail, always
+				p.done   = p.then;
+				p.fail   = p.catch;
+				p.always = p.finally;
+
+				return p;
 			}
 		};
-
-	api.done   = api.success;
-	api.fail   = api.error;
-	api.always = api.complete;
 
 	return api;
 };

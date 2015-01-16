@@ -1,0 +1,25 @@
+{
+  "name": "gulp-replacer",
+  "version": "0.0.3",
+  "description": "",
+  "main": "index.js",
+  "homepage": "",
+  "private": true,
+  "repository": {
+    "type": "",
+    "url": ""
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": {
+    "name": "Joe Clay",
+    "email": "j053phclay@gmail.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^2.4.1",
+    "through2": "^0.6.3"
+  },
+  "devDependencies": {}
+}

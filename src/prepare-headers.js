@@ -1,35 +1,34 @@
-var _CONTENT_TYPE = 'Content-Type',
-	_ACCEPT       = 'Accept',
-	_ACCEPT_MAP   = {
+var ACCEPT_MAP = {
+		text: '*/*',
 		xml:  'application/xml, text/xml',
 		html: 'text/html',
 		json: 'application/json, text/javascript',
 		js:   'application/javascript, text/javascript'
 	},
 
-	_toUpper = function(match, str1, str2) {
-		return (str1 + str2).toUpperCase();
+	CONTENT_MAP = {
+		text: 'text/plain',
+		json: 'application/json'
 	},
 
-	_rKeyFormatter = /(^|-)([^-])/g;
+	rKeyFormatter = /(^|-)([^-])/g,
+	toUpper = function(match, str1, str2) {
+		return (str1 + str2).toUpperCase();
+	};
 
-module.exports = function(xhr, headers, method, type, isSerialized) {
+module.exports = function(xhr, headers, method, type) {
 	var headerKey, formattedHeaderKey;
 	for (headerKey in headers) {
-		formattedHeaderKey = headerKey.replace(_rKeyFormatter, _toUpper);
-		headers[formattedHeaderKey] = headers[headerKey];
-
-		delete headers[headerKey];
-
-		xhr.setRequestHeader(formattedHeaderKey, headers[formattedHeaderKey]);
+		formattedHeaderKey = headerKey.replace(rKeyFormatter, toUpper);
+		xhr.setRequestHeader(formattedHeaderKey, headers[headerKey]);
 	}
 
 	// ensure a content type
-	if (!headers[_CONTENT_TYPE] && isSerialized && method !== 'GET') {
-		xhr.setRequestHeader(_CONTENT_TYPE, 'application/x-www-form-urlencoded');
+	if (!headers['Content-Type'] && method !== 'GET') {
+		xhr.setRequestHeader('Content-Type', CONTENT_MAP[type] || 'application/x-www-form-urlencoded');
 	}
 
-	if (!headers[_ACCEPT]) {
-		xhr.setRequestHeader(_ACCEPT, _ACCEPT_MAP[type]);
+	if (!headers['Content-Type']) {
+		xhr.setRequestHeader('Accept', ACCEPT_MAP[type]);
 	}
 };

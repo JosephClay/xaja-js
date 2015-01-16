@@ -1,33 +1,43 @@
-var root = window,
-	_encodeURIComponent = encodeURIComponent;
+var _ = require('./utils');
 
-module.exports = function(data, method) {
-	var isSerialized = false;
+// serializeData to query string
+var serializeData = function(data) {
+	var values = [],
+		key;
+	for (key in data) {
+		if (data[key] !== undefined) {
+			values.push(encodeURIComponent(key) + (data[key].pop ? '[]' : '') + '=' + encodeURIComponent(data[key]));
+		}
+	}
+	return values.join('&');
+};
 
-	if (
-		root.ArrayBuffer &&
-		(data instanceof ArrayBuffer ||
-		data instanceof Blob         ||
-		data instanceof Document     ||
-		data instanceof FormData)
-	) {
-		if (method === 'GET') {
-			data = null;
-		}
-	} else {
-		var values = [],
-			key;
-		for (key in data) {
-			if (data[key] !== undefined) {
-				values.push(_encodeURIComponent(key) + (data[key].pop ? '[]' : '') + '=' + _encodeURIComponent(data[key]));
-			}
-		}
-		data = values.join('&');
-		isSerialized = true;
+module.exports = function(data, method, type) {
+	if (!_.exists(data)) {
+		return null;
 	}
 
-	return {
-		data: data,
-		serialized: isSerialized
-	};
+	if (
+		type === 'arraybuffer' ||
+		type === 'formdata'    ||
+		type === 'document'    ||
+		type === 'file'        ||
+		type === 'blob'        
+	) {
+		return method === 'GET' ? null : data; 
+	}
+	
+	if (type === 'text' && _.isString(data)) {
+		return data;
+	}
+
+	if (type === 'json' && !_.isString(data)) {
+		data = JSON.stringify(data);
+	}
+
+	if (type === 'post') {
+		return serializeData(data);
+	}
+
+	return data;
 };

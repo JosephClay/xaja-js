@@ -1,25 +1,21 @@
-var _rHasQuery = /\?/,
-	_now = Date.now || function() { return new Date().getTime(); };
+var _ = require('./utils'),
+	rHasQuery = /\?/;
 
 module.exports = function(url, data, method, cache) {
 	var vars = '';
 
 	// Prepare URL
 	if (method === 'GET') {
-		vars += data;
+		vars += !_.exists(data) ? '' : data;
 	}
 
-	if (cache !== undefined) {
-		cache = (method === 'POST');
-	}
-
-	if (!cache) {
+	if (cache === false && method === 'GET') {
 		if (vars) { vars += '&'; }
-		vars += '_=' + _now();
+		vars += '_=' + _.now();
 	}
 
 	if (vars) {
-		url += (_rHasQuery.test(url) ? '&' : '?') + vars;
+		url += (rHasQuery.test(url) ? '&' : '?') + vars;
 	}
 
 	return url;

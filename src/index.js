@@ -1,165 +1,219 @@
-/**
- * Based on qwest
- * https://github.com/pyrsmk/qwest
- */
-var root = window,
-	XML_HTTP_REQUEST = 'XMLHttpRequest',
+var _ = require('./utils'),
 
 	getXHR = function() {
-		return root[XML_HTTP_REQUEST] ?
-				new root[XML_HTTP_REQUEST]() :
-				new ActiveXObject('Microsoft.XMLHTTP');
+		return window['XMLHttpRequest'] ?
+			new window['XMLHttpRequest']() :
+			new ActiveXObject('Microsoft.XMLHTTP');
+	},
+
+	getXDR = function() {
+		// CORS with IE8/9
+		return new XDomainRequest();
 	},
 
 	// Guess XHR version
 	isVersion2 = (getXHR().responseType === ''),
 
-	toString = ({}).toString,
-	isString = function(obj) {
-		return toString.call(obj) === '[object String]';
-	},
+	promise         = require('./promise'),
+	prepareHeaders  = require('./prepare-headers'),
+	prepareUrl      = require('./prepare-url'),
+	prepareData     = require('./prepare-data'),
+	responseHandler = require('./response-handler'),
+	progressHandler = require('./progress-handler');
 
-    // Extend a given object with all the properties in passed-in object(s).
-    extend = function(base) {
-        var args = arguments,
-            idx = 1, len = args.length;
-        for (; idx < len; idx++) {
-            var source = args[idx];
-            if (source) {
-                for (var prop in source) {
-                    base[prop] = source[prop];
-                }
-            }
-        }
-        return base;
-    },
+// determine if we're dealing with a cross origin request
+var determineIfCrossOrigin = function(url) {
+	var host = url.match(/\/\/(.+?)\//);
+	return host && host[1] ? host[1] !== location.host : false;
+};
 
-    promise = require('./promise'),
-    prepareUrl = require('./prepare-url'),
-    prepareData = require('./prepare-data'),
-    prepareHeaders = require('./prepare-headers'),
-    responseHandler = require('./response-handler');
+var getMethod = function(method, isCrossOrigin) {
+	method = (method || '').toUpperCase();
+	return (isCrossOrigin && method !== 'GET' && method !== 'POST') ? 'POST' : method || 'GET';
+};
 
-// Core function
-function xaja(options) {
+var determineType = function(data) {
+	var def = xaja.default,
+		arrBuff = window.ArrayBuffer;
+	if (!arrBuff) { return def; }
 
-	var isTypeSupported = false,
-		xhr             = options.xhr ? options.xhr() : getXHR(),
+	if (data instanceof arrBuff            || 
+		data instanceof window.Uint16Array || 
+		data instanceof window.Uint32Array || 
+		data instanceof window.Uint8Array  || 
+		data instanceof window.Uint8ClampedArray) { return 'arraybuffer'; }
+
+	if (data instanceof window.Blob)        { return 'blob';     }
+	if (data instanceof window.Document)    { return 'document'; }
+	if (data instanceof window.FormData)    { return 'formdata'; }
+	return def;
+};
+
+var parseOptions = function(urlParam, config) {
+	if (_.isString(urlParam)) {
+		var options = options || {};
+		options.url = urlParam;
+		return options;
+	}
+	return urlParam || {};
+};
+
+function xaja(urlParam, config) {
+	var options         = parseOptions(urlParam, config),
+		initialUrl      = options.url || '',
+		isCrossOrigin   = options.crossDomain || determineIfCrossOrigin(initialUrl),
+
+		timerTimeout,
+		getTimer        = function() { return timerTimeout; },
+		timeoutDur      = options.timeout ? +options.timeout : xaja.timeout,
+
+		currentTries    = 0,
+		retries         = options.retries ? +options.retries : 0,
+
+		async           = options.async !== undefined ? !!options.async : true,
+		createXHR       = options.xhr ? options.xhr : isCrossOrigin && window.XDomainRequest ? getXDR : getXHR,
 		overrideMime    = options.mimeType,
-		beforeSend      = options.beforeSend,
-		initialUrl      = options.url  || '',
-		method          = options.type || options.method || 'GET',
+		beforeSend      = options.before || options.beforeSend,
+		withCredentials = options.withCredentials,
+		method          = getMethod(options.type || options.method, isCrossOrigin),
 		initialData     = options.data || null,
-		async           = options.async === undefined ? true : !!options.async,
-		cache           = options.cache,
-		type            = options.dataType ? options.dataType.toLowerCase() : 'json',
+		cache           = options.cache === undefined ? true : !!options.cache,
+		type            = options.dataType ? options.dataType.toLowerCase() : determineType(initialData),
 		user            = options.user || options.username || '',
 		password        = options.password || '',
 		statusCode      = options.statusCode,
-		callContext     = options.context,
 		xhrFields       = options.xhrFields,
-		headers         = extend({ 'X-Requested-With': XML_HTTP_REQUEST },
-			options.contentType ? { 'Content-Type': options.contentType } : {},
-			options.headers);
+		headers         = _.extend({ 'X-Requested-With': 'XMLHttpRequest' }, options.headers),
 
+		xhr;
+
+	// prepare the promise
 	var promises = promise(), func;
-	if ((func = options.success))  { promises.success(func);  }
+	if ((func = options.success))  { promises.done(func);     }
 	if ((func = options.complete)) { promises.complete(func); }
 	if ((func = options.error))    { promises.error(func);    }
 	if ((func = options.progress)) { promises.progress(func); }
 
-	// prepare data
-	var dataPrep = prepareData(initialData, method),
-		data = dataPrep.data,
-		isSerialized = dataPrep.serialized;
+	var data = prepareData(initialData, method, type),
+		url  = prepareUrl(initialUrl, data, method, cache);
 
-	// prepare url
-	url = prepareUrl(initialUrl, data, method, cache);
+	var send = function() {
+		var isTypeSupported,
+			xhr = createXHR();
 
-	xhr.onprogress = function(evt) {
-		if (!evt.lengthComputable) { return; }
+		xhr.onprogress = progressHandler(promises);
 
-		// evt.loaded the bytes browser receive
-		// evt.total the total bytes seted by the header
-		var percentComplete = (evt.loaded / evt.total) * 100;
-		promises.tick(percentComplete);
+		// Open connection
+		if (isCrossOrigin) {
+	        xhr.open(method, url);
+	    } else {
+			xhr.open(method, url, async, user, password);
+	    }
+
+		if (isVersion2 && async) {
+	        xhr.withCredentials = withCredentials;
+	    }
+
+		// Identify supported XHR version
+		if (type && isVersion2) {
+			_.attempt(function() {
+				xhr.responseType = type;
+				// Don't verify for 'document' since we're using an internal routine
+				isTypeSupported = (xhr.responseType === type && type !== 'document');
+			});
+		}
+
+		var handleResponse = xhr._handleResponse = responseHandler(xhr, type, isTypeSupported, promises, url, statusCode, getTimer);
+		handleResponse.bind(isCrossOrigin, isVersion2);
+		
+		if (!isCrossOrigin) {
+			prepareHeaders(xhr, headers, method, type);
+		}
+
+		if (overrideMime) {
+			xhr.overrideMimeType(overrideMime);
+		}
+
+		if (beforeSend) { beforeSend.call(xhr); }
+
+		if (xhrFields) {
+			var xhrKey;
+			for (xhrKey in xhrFields) {
+				xhr[xhrKey] = xhrFields[xhrKey];
+			}
+		}
+
+		if (isCrossOrigin) {
+	        // https://developer.mozilla.org/en-US/docs/Web/API/XDomainRequest
+	        setTimeout(function() { xhr.send(); }, 0);
+	    } else {
+			xhr.send(method !== 'GET' ? data : null);
+	    }
+
+	    return xhr;
 	};
 
-	// Open connection
-	xhr.open(method, url, async, user, password);
+	xhr = send();
 
-	// Identify supported XHR version
-	if (type && isVersion2) {
-		try {
-			xhr.responseType = type;
-			isTypeSupported = (xhr.responseType == type);
-		}
-		catch (e) {}
-	}
+	// Timeout/retries
+    var timeout = function() {
+	    timerTimeout = setTimeout(function() {
+	        xhr.abort();
+	        xhr.response = 'Timeout ('+ url +')';
+	        
+	        if (currentTries >= retries) {
+	        	if (async) { xhr._handleResponse(); }
+	        	return;
+	        }
 
-	var handleResponse = responseHandler(xhr, isTypeSupported, promises, url, statusCode, callContext);
-	// Plug response handler
-	if (isVersion2) {
+	        currentTries++;
+	    	xhr = send();
+	    	timeout();
+			
+	    }, timeoutDur);
+	};
 
-		xhr.onload = handleResponse;
-
-	} else {
-
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState !== 4) { return; }
-			handleResponse();
-		};
-	}
-
-	prepareHeaders(xhr, headers, method, type, isSerialized);
-
-	if (overrideMime) {
-		xhr.overrideMimeType(overrideMime);
-	}
-
-	if (beforeSend) { beforeSend.call(xhr); }
-
-	if (xhrFields) {
-		var xhrKey;
-		for (xhrKey in xhrFields) {
-			xhr[xhrKey] = xhrFields[xhrKey];
-		}
-	}
-
-	// send the request
-	xhr.send(method !== 'GET' ? data : null);
+	timeout();
 
 	// return the promises
-	return promises;
+	return promises.promise();
 }
 
 // a shortcut composer for xaja methods, e.g. .get(), .post()
 var shortcut = function(method) {
 	return function(url, data, success, dataType) {
+		// url isnt a string, assume
+		// an object was passed to a
+		// shortcut method
+		if (!_.isString(url)) {
+			return xaja(url);
+		}
+
+		// compose a xaja object with 
+		// the parameters passed
+		if (method === 'GET' && _.isFunction(data)) {
+			success = data;
+			data = null;
+		}
+
 		return xaja({
-			url: url,
-			method: method,
-			success: success,
+			url:      url,
+			data:     data,
+			method:   method,
+			success:  success,
 			dataType: dataType
 		});
 	};
 };
 
-module.exports = extend(xaja, {
-	xhr2: isVersion2,
-	getXHR: getXHR,
-	ajax: function(url, options) {
-		var config;
-		if (isString(url)) {
-			config = options || {};
-			config.url = url;
-		} else {
-			config = url || {};
-		}
-		return xaja(config);
-	},
-	get: shortcut('GET'),
-	post: shortcut('POST'),
-	put: shortcut('PUT'),
-	del: shortcut('DEL')
+module.exports = _.extend(xaja, {
+	timeout:  3000,
+	default:  'post',
+	xhr2:     isVersion2,
+	getXHR:   getXHR,
+	ajax:     xaja,
+	get:      shortcut('GET'),
+	post:     shortcut('POST'),
+	put:      shortcut('PUT'),
+	del:      shortcut('DELETE')
 });

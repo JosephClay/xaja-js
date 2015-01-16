@@ -1,32 +1,44 @@
 xaja-js
 ====
 
-A micro ajax library base on [qwest](https://github.com/pyrsmk/qwest) but with a [jquery](http://api.jquery.com/jQuery.ajax/) api, and progress checking.
+A micro ajax library base on [qwest](https://github.com/pyrsmk/qwest) but
+with a [jquery](http://api.jquery.com/jQuery.ajax/)-like api. Includes xhr2 
+progress events and is built for speed while maintaining a small size.
 
 `npm install xaja-js`
-
-~2KB minified and gzipped
 
 Examples
 ----
 Construct an ajax request:
 ```javascript
 xaja.ajax(url [,options])
-    .success(function(res) {
+    .then(function(res) {
         console.log(res);
     });
 ```
 or
 ```javascript
 var promise = xaja.ajax(options);
-promise.done(doSomething)
-        .fail(doSomethingElse)
-        .always(cleanUp);
+promise.then(doSomething)
+    .catch(doSomethingElse);
 ```
 get and post are also available
 ```javascript
-xaja.get(url, data).done(etc);
-xaja.post(url, data).done(etc);
+xaja.get(url, data).then(success, failure);
+xaja.post(url, data).then(success, failure);
+```
+
+JSON defaults
+----
+Default to JSON and let xaja handle
+stringifying your data
+```javascript
+xaja.default = 'json';
+
+xaja.post('/test', { foo: 'bar' })
+	.then(function(res) {
+		console.log(res);
+	});
 ```
 
 Settings
@@ -36,32 +48,54 @@ jQuery settings support:
 | Supported   | Not Supported |
 | ----------- | ------------- |
 | headers     | accepts       |
-| mimeType    | timeout       |
-| password    | traditional   |
-| dataType    | contents      |
-| error       | scriptCharset |
-| data        | context       |
-| statusCode  | converters    |
-| success     | crossDomain   |
-| contentType | dataFilter    |
-| type        | ifModified    |
-| url         | isLocal       |
-| username    | jsonp         |
-| xhr         | jsonpCallback |
-| xhrFields   | processData   |
-| async       | global        |
-| beforeSend  |               |
-| cache       |               |
-| complete    |               |
-
+| mimeType    | traditional   |
+| password    | contents      |
+| dataType    | scriptCharset |
+| error       | context       |
+| data        | converters    |
+| statusCode  | dataFilter    |
+| success     | ifModified    |
+| contentType | isLocal       |
+| type        | jsonp         |
+| url         | jsonpCallback |
+| username    | processData   |
+| xhr         | global        |
+| xhrFields   | async         |
+| complete    |
+| beforeSend  |
+| cache       |
+| timeout     |
+| crossDomain |
 
 Note
 ----
-- Unlike [qwest](https://github.com/pyrsmk/qwest), therea are no limit settings.
-- This lib is for browsers IE9+
-- Unit tests pending.
+- Unlike qwest, therea are no `limit` settings.
+- More jquery methods/options may be added in the future
+- Does not support jquery's deprecated `success`, `error`, `complete` methods
+- Supports IE9+
 
-License
-----
+```
 
-MIT
+#License
+
+The MIT License (MIT)
+
+Copyright (c) 2014 Joseph Clay
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
