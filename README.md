@@ -72,7 +72,7 @@ jQuery settings support:
 
 Note
 ----
-- Unlike qwest, therea are no `limit` settings.
+- Unlike qwest, there are no `limit` settings.
 - More jquery methods/options may be added in the future
 - Does not support jquery's deprecated `success`, `error`, `complete` methods
 - Supports IE9+
